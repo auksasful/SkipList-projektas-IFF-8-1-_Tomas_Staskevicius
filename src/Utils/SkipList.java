@@ -5,396 +5,156 @@
  */
 package Utils;
 
+import java.util.AbstractList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 
 /**
  *
  * @author Tomas
  */
-public class SkipList {
-     public SkipListEntry head;    // First element of the top level
-  public SkipListEntry tail;    // Last element of the top level
+public class SkipList<E extends Comparable<E>> extends AbstractList<E>{
+    
+    protected static Random r = new Random();
 
+    /** head terminal for all the linked-lists */
+    private SkipListEntry<E> head = new SkipListEntry<>(null);
+    /** tail terminal for all the linked-lists */
+    private SkipListEntry<E> tail = new SkipListEntry<>(null);
 
-  public int n; 		// number of entries in the Skip list
+    public SkipList(E[] something) {
+        Collections.addAll(this, something);
+    }
 
-  public int h;       // Height
-  public Random r;    // Coin toss
+    public SkipList() {
+    }
 
-  /* ----------------------------------------------
-     Constructor: empty skiplist
+    @Override 
+    public Iterator<E> iterator() {
+        return new Iterator<E>() {
+            SkipListEntry<E> current = head;
 
-                          null        null
-                           ^           ^
-                           |           |
-     head --->  null <-- -inf <----> +inf --> null
-                           |           |
-                           v           v
-                          null        null
-     ---------------------------------------------- */
-  public SkipList()     // Default constructor...
-  { 
-     SkipListEntry p1, p2;
+            @Override public boolean hasNext() {
+                return current.getNextAtLevel(0) != tail;
+            }
 
-     p1 = new SkipListEntry(SkipListEntry.negInf, null);
-     p2 = new SkipListEntry(SkipListEntry.posInf, null);
+            @Override public E next() {
+                if (!hasNext()) throw new NoSuchElementException();
+                current = current.getNextAtLevel(0);
+                return current.getElem();
+            }
+        };
+    }
 
-     head = p1;
-     tail = p2;
+    @Override public int size() {
+        final int[] size = {0};
+        iterator().forEachRemaining(t -> size[0]++);
+        return size[0];
+    }
 
-     p1.right = p2;
-     p2.left = p1;
-
-     n = 0;
-     h = 0;
-
-     r = new Random();
-  }
-
-
-  /** Returns the number of entries in the hash table. */
-  public int size() 
-  { 
-    return n; 
-  }
-
-  /** Returns whether or not the table is empty. */
-  public boolean isEmpty() 
-  { 
-    return (n == 0); 
-  }
-
-  /* ------------------------------------------------------
-     findEntry(k): find the largest key x <= k
-		   on the LOWEST level of the Skip List
-     ------------------------------------------------------ */
-  public SkipListEntry findEntry(String k)
-  {
-     SkipListEntry p;
-
-     /* -----------------
-	Start at "head"
-	----------------- */
-     p = head;
-
-     while ( true )
-     {
-        /* --------------------------------------------
-	   Search RIGHT until you find a LARGER entry
-
-           E.g.: k = 34
-
-                     10 ---> 20 ---> 30 ---> 40
-                                      ^
-                                      |
-                                      p stops here
-		p.right.key = 40
-	   -------------------------------------------- */
-        while ( p.right.key != SkipListEntry.posInf && 
-		p.right.key.compareTo(k) <= 0 )
-	{
-           p = p.right;
-//         System.out.println(">>>> " + p.key);
-	}
-
-	/* ---------------------------------
-	   Go down one level if you can...
-	   --------------------------------- */
-	if ( p.down != null )
-        {  
-           p = p.down;
-//         System.out.println("vvvv " + p.key);
+    /** NB: this is not thread safe or reentrant */
+    @Override 
+    public boolean add(E elem) {
+        /* floor is empty when there are no less-or-equal elements.
+         * It is null when the skip-list is empty */
+        List<SkipListEntry<E>> prevNodes = floor(elem);
+        if (prevNodes == null) {
+            addWhenEmpty(elem);
+            return true;
+        } else if (prevNodes.isEmpty()) {
+            addToBeginning(elem);
+            return true;
         }
-        else
-	   break;	// We reached the LOWEST level... Exit...
-     }
-
-     return(p);         // p.key <= k
-  }
-
-
-  /** Returns the value associated with a key. */
-  public Integer get (String k) 
-  {
-     SkipListEntry p;
-
-     p = findEntry(k);
-
-     if ( k.equals( p.getKey() ) )
-        return(p.value);
-     else
-        return(null);
-  }
-
-  /* ------------------------------------------------------------------
-     insertAfterAbove(p, q, y=(k,v) )
- 
-        1. create new entry (k,v)
-	2. insert (k,v) AFTER p
-	3. insert (k,v) ABOVE q
-
-             p <--> (k,v) <--> p.right
-                      ^
-		      |
-		      v
-		      q
-
-      Returns the reference of the newly created (k,v) entry
-     ------------------------------------------------------------------ */
-  public SkipListEntry insertAfterAbove(SkipListEntry p, SkipListEntry q, 
-                                         String k)
-  {
-     SkipListEntry e;
-
-     e = new SkipListEntry(k, null);
-
-     /* ---------------------------------------
-	Use the links before they are changed !
-	--------------------------------------- */
-     e.left = p;
-     e.right = p.right;
-     e.down = q;
-
-     /* ---------------------------------------
-	Now update the existing links..
-	--------------------------------------- */
-     p.right.left = e;
-     p.right = e;
-     q.up = e;
-
-     return(e);
-  }
-
-  /** Put a key-value pair in the map, replacing previous one if it exists. */
-  public Integer put (String k, Integer v) 
-  {
-     SkipListEntry p, q;
-     int       i;
-
-     p = findEntry(k);
-
-//   System.out.println("findEntry(" + k + ") returns: " + p.key);
-     /* ------------------------
-	Check if key is found
-	------------------------ */
-     if ( k.equals( p.getKey() ) )
-     {
-        Integer old = p.value;
-
-	p.value = v;
-
-    	return(old);
-     }
-
-     /* ------------------------
-	Insert new entry (k,v)
-	------------------------ */
-
-     /* ------------------------------------------------------
-        **** BUG: He forgot to insert in the lowest level !!!
-	Link at the lowest level
-	------------------------------------------------------ */
-     q = new SkipListEntry(k, v);
-     q.left = p;
-     q.right = p.right;
-     p.right.left = q;
-     p.right = q;
-
-     i = 0;                   // Current level = 0
-
-     while ( r.nextDouble() < 0.5 )
-     {
-	// Coin flip success: make one more level....
-
-//	System.out.println("i = " + i + ", h = " + h );
-
-	/* ---------------------------------------------
-	   Check if height exceed current height.
- 	   If so, make a new EMPTY level
-	   --------------------------------------------- */
-        if ( i >= h )
-   	{
-           SkipListEntry p1, p2;
-
-	   h = h + 1;
-
-           p1 = new SkipListEntry(SkipListEntry.negInf,null);
-           p2 = new SkipListEntry(SkipListEntry.posInf,null);
-   
-	   p1.right = p2;
-	   p1.down  = head;
-
-	   p2.left = p1;
-	   p2.down = tail;
-
-	   head.up = p1;
-	   tail.up = p2;
-
-	   head = p1;
-	   tail = p2;
-	}
-
-
-	/* -------------------------
-	   Scan backwards...
-	   ------------------------- */
-	while ( p.up == null )
-	{
-//	   System.out.print(".");
-	   p = p.left;
-	}
-
-//	System.out.print("1 ");
-
-	p = p.up;
-
-
-	/* ---------------------------------------------
-           Add one more (k,v) to the column
-	   --------------------------------------------- */
-   	SkipListEntry e;
-   		 
-   	e = new SkipListEntry(k, null);  // Don't need the value...
-   		 
-   	/* ---------------------------------------
-   	   Initialize links of e
-   	   --------------------------------------- */
-   	e.left = p;
-   	e.right = p.right;
-   	e.down = q;
-   		 
-   	/* ---------------------------------------
-   	   Change the neighboring links..
-   	   --------------------------------------- */
-   	p.right.left = e;
-   	p.right = e;
-   	q.up = e;
-
-        q = e;		// Set q up for the next iteration
-
-        i = i + 1;	// Current level increased by 1
-
-     }
-
-     n = n + 1;
-
-     return(null);   // No old value
-  }
-
-  /** Removes the key-value pair with a specified key. */
-  public Integer remove (String key) 
-  {
-     return(null);
-  }
-
-  public void printHorizontal()
-  {
-     String s = "";
-     int i;
-
-     SkipListEntry p;
-
-     /* ----------------------------------
-	Record the position of each entry
-	---------------------------------- */
-     p = head;
-
-     while ( p.down != null )
-     {
-        p = p.down;
-     }
-
-     i = 0;
-     while ( p != null )
-     {
-        p.pos = i++;
-        p = p.right;
-     }
-
-     /* -------------------
-	Print...
-	------------------- */
-     p = head;
-
-     while ( p != null )
-     {
-        s = getOneRow( p );
-	System.out.println(s);
-
-        p = p.down;
-     }
-  }
-
-  public String getOneRow( SkipListEntry p )
-  {
-     String s;
-     int a, b, i;
-
-     a = 0;
-
-     s = "" + p.key;
-     p = p.right;
-
-
-     while ( p != null )
-     {
-        SkipListEntry q;
-
-        q = p;
-        while (q.down != null)
-	   q = q.down;
-        b = q.pos;
-
-        s = s + " <-";
-
-
-        for (i = a+1; i < b; i++)
-           s = s + "--------";
- 
-        s = s + "> " + p.key;
-
-        a = b;
-
-        p = p.right;
-     }
-
-     return(s);
-  }
-
-  public void printVertical()
-  {
-     String s = "";
-
-     SkipListEntry p;
-
-     p = head;
-
-     while ( p.down != null )
-        p = p.down;
-
-     while ( p != null )
-     {
-        s = getOneColumn( p );
-	System.out.println(s);
-
-        p = p.right;
-     }
-  }
-
-
-  public String getOneColumn( SkipListEntry p )
-  {
-     String s = "";
-
-     while ( p != null )
-     {
-        s = s + " " + p.key;
-
-        p = p.up;
-     }
-
-     return(s);
-  }
-  
+        /* add it after the floor */
+       SkipListEntry<E> newNode = new SkipListEntry<>(elem);
+        for (int level = 0; level == 0 || r.nextBoolean(); level++) {
+            SkipListEntry<E> prevNode = level < prevNodes.size() ? prevNodes.get(level) : head;
+            SkipListEntry<E> wasNext = level < prevNodes.size() ? prevNode.getNextAtLevel(level) : tail;
+            prevNode.setNextAtLevel(level, newNode);
+            newNode.setNextAtLevel(level, wasNext);
+        }
+        return true;
+    }
+
+    private void addToBeginning(E elem) {
+        SkipListEntry<E> newFirst = new SkipListEntry<>(elem);
+        for (int i = 0; i == 0 || r.nextBoolean(); i++) {
+            SkipListEntry<E> wasFirst = head.getNextAtLevel(i);
+            head.setNextAtLevel(i, newFirst);
+            newFirst.setNextAtLevel(i, wasFirst);
+        }
+    }
+
+    /* TODO could we use addToBeginning instead of this function? */
+    private void addWhenEmpty(E elem) {
+        SkipListEntry<E> n = new SkipListEntry<>(elem);
+
+        // definitely add the first layer
+        head.addLevelPointingTo(n);
+        n.addLevelPointingTo(tail);
+
+        // possibly keep adding layers
+        while (r.nextBoolean()) {
+            head.addLevelPointingTo(n);
+            n.addLevelPointingTo(tail);
+        }
+    }
+
+    /**
+     * currently O(N);
+     * we could get O(logN) by storing "window" sizes in next-pointers
+     */
+    @Override public E get(int index) {
+        Iterator<E> iterator = iterator();
+        while (index-- > 0) iterator.next();
+        return iterator.next();
+    }
+    
+    public E getNext(int currentIndex) {
+        Iterator<E> iterator = iterator();
+        E el = null;
+        
+       while (currentIndex-- > 0) el = iterator.next();
+       el = iterator.next();
+       if(iterator.hasNext()){
+            el = iterator.next();
+            return el;
+       }
+       else{
+           E first = get(0);
+           return first;
+       }
+    }
+    
+     public E getBack(int currentIndex) {
+        E el = null;
+        
+       if(currentIndex > 0){
+            el = get(currentIndex - 1);
+            return el;
+       }
+       else{
+          Iterator<E> iterator = iterator();
+          while(iterator.hasNext()){
+              el = iterator.next();
+          }
+           return el;
+       }
+    }
+    
+    
+
+    @Override public boolean contains(Object o) {
+        return head.contains((E) o);
+    }
+
+    private List<SkipListEntry<E>> floor(E elem) {
+        List<SkipListEntry<E>> nodes = head.headFloor(elem);
+        if (nodes != null) Collections.reverse(nodes);
+        return nodes;
+    }
   
 }

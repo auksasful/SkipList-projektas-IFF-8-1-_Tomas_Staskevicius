@@ -9,6 +9,7 @@ package Utils;
  *
  * @author Tomas
  */
-public class AbstractSkipList {
+public interface AbstractSkipList<E> {
+    //
     
 }
