@@ -82,8 +82,10 @@ public class Gallery extends Application{
             FlowPane root = new FlowPane();
             root.getChildren().addAll(btn1,img, btn2);
             
-		Scene scene = new Scene(root, 800, 500);
+		Scene scene = new Scene(root, 500, 450);
+                
                 stage.setTitle("Galerija - Tomas Staškevičius IFF -8/1");
+                stage.setResizable(false);
 		stage.setScene(scene);
 		
 		stage.show();
