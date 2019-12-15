@@ -7,12 +7,16 @@ package Gallery;
 
 import Utils.SkipList;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -49,7 +53,23 @@ public class Gallery extends Application{
             ImageView img = new ImageView(imgList.get(curId).img);
             img.setFitHeight(400);
             img.setFitWidth(400);
-            
+            TextArea searchValueField = new TextArea();
+             TextArea searchIdField = new TextArea();
+            Button searchBtn = new Button("Paieška");
+            searchBtn.setOnAction(new EventHandler<ActionEvent>() {
+			
+			@Override
+			public void handle(ActionEvent event) {
+                                String fieldValue = searchValueField.getText();
+                                String fieldId = searchIdField.getText();
+                            try {
+                                ComparableImage searchObj = new ComparableImage(Integer.parseInt(fieldId), new Image(new FileInputStream("images\\" + fieldValue)));
+                            } catch (FileNotFoundException ex) {
+                                Logger.getLogger(Gallery.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                               
+			}
+		});
             Button btn1 = new Button("LEFT");
 		btn1.setOnAction(new EventHandler<ActionEvent>() {
 			
@@ -80,9 +100,9 @@ public class Gallery extends Application{
 		});
                 
             FlowPane root = new FlowPane();
-            root.getChildren().addAll(btn1,img, btn2);
+            root.getChildren().addAll(searchValueField, searchIdField, searchBtn, btn1,img, btn2);
             
-		Scene scene = new Scene(root, 500, 450);
+		Scene scene = new Scene(root, 1000, 1000);
                 
                 stage.setTitle("Galerija - Tomas Staškevičius IFF -8/1");
                 stage.setResizable(false);

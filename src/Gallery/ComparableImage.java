@@ -12,32 +12,22 @@ import javafx.scene.image.Image;
  * @author Tomas
  */
 public class ComparableImage  implements Comparable<ComparableImage>{
-    int id;
     Image img;
     
-    ComparableImage(int id, Image img){
-        this.id = id;
+    ComparableImage(Image img){
         this.img = img;
     }
     
     
     @Override
     public String toString(){
-        return id + " " + img; 
+        return "" + img; 
     }
     
     
     @Override
     public int compareTo(ComparableImage t) {
-       if(this.id > t.id){
-           return 1;
-       }
-      else if(this.id > t.id){
-          return -1;
-      }
-      else{
-          return 0;
-      }
-       //To change body of generated methods, choose Tools | Templates.
+       return this.img.toString().compareTo(t.img.toString());
+
     }
 }
