@@ -13,21 +13,22 @@ import javafx.scene.image.Image;
  */
 public class ComparableImage  implements Comparable<ComparableImage>{
     Image img;
+    String imageName;
     
-    ComparableImage(Image img){
+    ComparableImage(Image img, String name){
         this.img = img;
+        this.imageName = name;
     }
     
     
     @Override
     public String toString(){
-        return "" + img; 
+        return "" + img.toString(); 
     }
     
     
     @Override
     public int compareTo(ComparableImage t) {
-       return this.img.toString().compareTo(t.img.toString());
-
+       return this.imageName.compareTo(t.imageName);
     }
 }

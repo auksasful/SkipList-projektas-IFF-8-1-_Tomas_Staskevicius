@@ -45,25 +45,33 @@ public class Gallery extends Application{
             Image im1 = new Image(new FileInputStream("images\\javafx1.jpg"));
             Image im2 = new Image(new FileInputStream("images\\javafx2.jpg"));
             Image im3 = new Image(new FileInputStream("images\\javafx3.jpg"));
-            imgList.add(new ComparableImage(100, im));
-            imgList.add(new ComparableImage(20, im1));
-            imgList.add(new ComparableImage(30, im2));
-            imgList.add(new ComparableImage(50, im3));
+            imgList.add(new ComparableImage(im, "javafx.jpg"));
+            imgList.add(new ComparableImage(im1, "javafx1.jpg"));
+            imgList.add(new ComparableImage(im2, "javafx2.jpg"));
+            imgList.add(new ComparableImage(im3, "javafx3.jpg"));
             curId = 0;
             ImageView img = new ImageView(imgList.get(curId).img);
+            //img.setFitHeight(400);
+            //img.setFitWidth(400);
             img.setFitHeight(400);
             img.setFitWidth(400);
+            img.setPreserveRatio(true);
             TextArea searchValueField = new TextArea();
-             TextArea searchIdField = new TextArea();
             Button searchBtn = new Button("Paieška");
             searchBtn.setOnAction(new EventHandler<ActionEvent>() {
 			
 			@Override
 			public void handle(ActionEvent event) {
                                 String fieldValue = searchValueField.getText();
-                                String fieldId = searchIdField.getText();
                             try {
-                                ComparableImage searchObj = new ComparableImage(Integer.parseInt(fieldId), new Image(new FileInputStream("images\\" + fieldValue)));
+                                ComparableImage searchObj = new ComparableImage(new Image(new FileInputStream("images\\" + fieldValue)), fieldValue);
+                                if(imgList.contains(searchObj)){
+                                    img.setImage(searchObj.img);
+                                }
+                                else{
+                                    imgList.add(searchObj);
+                                    img.setImage(searchObj.img);
+                                }
                             } catch (FileNotFoundException ex) {
                                 Logger.getLogger(Gallery.class.getName()).log(Level.SEVERE, null, ex);
                             }
@@ -100,7 +108,7 @@ public class Gallery extends Application{
 		});
                 
             FlowPane root = new FlowPane();
-            root.getChildren().addAll(searchValueField, searchIdField, searchBtn, btn1,img, btn2);
+            root.getChildren().addAll(searchValueField, searchBtn, btn1,img, btn2);
             
 		Scene scene = new Scene(root, 1000, 1000);
                 

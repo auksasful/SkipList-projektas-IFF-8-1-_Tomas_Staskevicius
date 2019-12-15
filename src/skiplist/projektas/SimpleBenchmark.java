@@ -21,6 +21,7 @@ import java.util.Locale;
 import java.util.Queue;
 import java.util.ResourceBundle;
 import java.util.Scanner;
+import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
@@ -36,13 +37,14 @@ public class SimpleBenchmark {
 
     private final Timekeeper timekeeper;
 
-    private final String[] BENCHMARK_NAMES = {"linkedListAdd", "skipListAdd", "linkedListContains", "skipListContains"};
+    private final String[] BENCHMARK_NAMES = {"linkedListAdd", "skipListAdd", "treeSetAdd", "linkedListContains", "skipListContains", "treeSetContains"};
     private final int[] COUNTS = {10000, 20000, 40000, 80000};
 
     private final Queue<String> chainsSizes = new LinkedList<>();
     
     private final SkipList skipList = new SkipList();
     private final LinkedList linkedList = new LinkedList();
+    private final TreeSet treeSet = new TreeSet();
 
     /**
      * For console benchmark
@@ -102,20 +104,14 @@ public class SimpleBenchmark {
                 
                 
 
-                skipList.clear();
-                linkedList.clear();
+              //  skipList.clear();
+               // linkedList.clear();
                 
                 timekeeper.startAfterPause();
                 
                 
                 
                 
-                read(singleHash, null, null, 0, k);
-                read(null,doubleHash,null,1,k);
-                read(null,null,genericHash,2,k);
-                
-                Object[] set = singleHash.keySet().toArray();
-               
                 
                 timekeeper.start();
                 
@@ -127,54 +123,68 @@ public class SimpleBenchmark {
                  timekeeper.finish(BENCHMARK_NAMES[0]);
                 
                  
-                 set = doubleHash.keySet().toArray();
+                // set = doubleHash.keySet().toArray();
                 
                // timekeeper.start();
                 usedMemoryBefore = runtime.totalMemory() - runtime.freeMemory();
                 for (int i = 0; i < k; i++) {
-                doubleHash.put((String)set[i],(String)set[i]);
+                skipList.add(valuesArray[i]);
                 }
                  long usedMemory2 = (runtime.totalMemory() - runtime.freeMemory()) - usedMemoryBefore;
                  timekeeper.finish(BENCHMARK_NAMES[1]);
                 
                  //set = singleHash.keySet().toArray();
                  
-                 String key = Integer.toString(k/2);
+                 //String key = Integer.toString(k/2);
                   
                // timekeeper.start();
                usedMemoryBefore = runtime.totalMemory() - runtime.freeMemory();
-                genericHash.containsKey(key);
-                genericHash.containsValue(key);
+               
+               
+               
+                usedMemoryBefore = runtime.totalMemory() - runtime.freeMemory();
+                for (int i = 0; i < k; i++) {
+                treeSet.add(valuesArray[i]);
+                }
                  long usedMemory3 = (runtime.totalMemory() - runtime.freeMemory()) - usedMemoryBefore;
-                timekeeper.finish(BENCHMARK_NAMES[2]);
+                 timekeeper.finish(BENCHMARK_NAMES[2]);
+                
+                 //set = singleHash.keySet().toArray();
+                 
+                 //String key = Integer.toString(k/2);
+                  
+               // timekeeper.start();
+               usedMemoryBefore = runtime.totalMemory() - runtime.freeMemory();
+                
+               
+                
+               for (int i = 0; i < k; i++) {
+                    linkedList.contains(valuesArray[k/2]);
+               }
+                 long usedMemory4 = (runtime.totalMemory() - runtime.freeMemory()) - usedMemoryBefore;
+                timekeeper.finish(BENCHMARK_NAMES[3]);
                  
                   
                  usedMemoryBefore = runtime.totalMemory() - runtime.freeMemory();
                // timekeeper.start();
                 
-                singleHash.contains(key); 
-                 long usedMemory4 = (runtime.totalMemory() - runtime.freeMemory()) - usedMemoryBefore;
-                timekeeper.finish(BENCHMARK_NAMES[3]);
-                
-                
-               Object[] setRemove = singleHash.keySet().toArray();
-                
-                
-               usedMemoryBefore = runtime.totalMemory() - runtime.freeMemory(); 
-               for(int i = 0; i < setRemove.length; i++){
-                    singleHash.remove((String)setRemove[i]);
+                 for (int i = 0; i < k; i++) {
+                    skipList.contains(valuesArray[k/2]);
                }
+                 long usedMemory5 = (runtime.totalMemory() - runtime.freeMemory()) - usedMemoryBefore;
+                timekeeper.finish(BENCHMARK_NAMES[4]);
+                
+                
+                
+                 usedMemoryBefore = runtime.totalMemory() - runtime.freeMemory();
+               // timekeeper.start();
+                
+                 for (int i = 0; i < k; i++) {
+                    treeSet.contains(valuesArray[k/2]);
+               }
+                 long usedMemory6 = (runtime.totalMemory() - runtime.freeMemory()) - usedMemoryBefore;
+                timekeeper.finish(BENCHMARK_NAMES[5]);
                
-               long usedMemory5 = (runtime.totalMemory() - runtime.freeMemory()) - usedMemoryBefore;
-               timekeeper.finish(BENCHMARK_NAMES[4]);
-                
-               setRemove = genericHash.keySet().toArray();
-               usedMemoryBefore = runtime.totalMemory() - runtime.freeMemory();
-                 for(int i = 0; i < setRemove.length; i++){
-                    genericHash.remove((String)setRemove[i]);
-               }
-               long usedMemory6 = (runtime.totalMemory() - runtime.freeMemory()) - usedMemoryBefore;
-               timekeeper.finish(BENCHMARK_NAMES[5]);
                
                  System.out.println("Memory consumption: 1) " + usedMemory + " 2) " +
                      usedMemory2 + " 3) " + usedMemory3 + " 4) " + usedMemory4 + " 5) " + usedMemory5 + " 6) " + usedMemory6);
@@ -186,42 +196,16 @@ public class SimpleBenchmark {
             chainsSizes.forEach(p -> sb.append(p).append(System.lineSeparator()));
             timekeeper.logResult(sb.toString());
             timekeeper.logResult(FINISH_COMMAND);
-        } catch (ValidationException e) {
+        } catch (InterruptedException e) {
             timekeeper.logResult(e.getMessage());
         }
     }
     
+      
     
     
     
     
-    
-    
-    
-     public void read(HashMap structure, HashMapOa structure2, java.util.HashMap structure3, int turn, int counter)
-    {
-        int k = 0;
-        try {
-            //
-            Scanner in = new Scanner(new File("C:\\Users\\Tomas\\Desktop\\Java laboratoriniai\\Lab3\\Lab3_MaisosLenteles\\data\\zodynas.txt"));
-            while(in.hasNext())
-            {
-                String value = in.nextLine();
-                if (counter != k) {
-                    if(turn == 0)
-                    structure.put(value, value);
-                    else if(turn == 1)
-                        structure2.put(value, value);
-                    else
-                        structure3.put(value, value);
-                    k++;
-                }
-            }
-            in.close();
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(SimpleBenchmark.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
     
     
 }
