@@ -7,6 +7,7 @@ package Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import skiplist.projektas.DataObj;
 
 /**
  *
@@ -103,5 +104,7 @@ public class SkipListEntry<E extends Comparable<E>> {
         }
         return false;
     }
-     
+    
+    
+   
 }

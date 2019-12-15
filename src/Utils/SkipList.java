@@ -145,7 +145,27 @@ public class SkipList<E extends Comparable<E>> extends AbstractList<E>{
        }
     }
     
-    
+    @Override
+     public int indexOf(Object o){
+         int index = 0;
+         
+         E element = get(index);
+         if(element.equals((E)o)){
+             return index;
+         }
+         
+         while(index <= size() - 1){
+             if(!element.equals((E)o)){
+                 element = getNext(index);
+             }
+             else{
+                 return index;
+             }
+             index++;
+         }
+        return -1;
+     } 
+     
 
     @Override public boolean contains(Object o) {
         return head.contains((E) o);

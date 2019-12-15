@@ -28,6 +28,10 @@ public class TestProg {
       //System.out.println(S.getNext());
      // S.printHorizontal();
       
+    // S.printFloor(elem3);
+     
+     
+     
       System.out.println("------");
 //    S.printVertical();
 //    System.out.println("======");

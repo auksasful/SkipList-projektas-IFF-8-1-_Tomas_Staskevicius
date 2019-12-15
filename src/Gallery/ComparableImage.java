@@ -23,7 +23,7 @@ public class ComparableImage  implements Comparable<ComparableImage>{
     
     @Override
     public String toString(){
-        return "" + img.toString(); 
+        return imageName; 
     }
     
     
