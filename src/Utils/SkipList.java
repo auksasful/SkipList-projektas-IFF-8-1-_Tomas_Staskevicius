@@ -16,7 +16,7 @@ import java.util.Random;
  *
  * @author Tomas
  */
-public class SkipList<E extends Comparable<E>> extends AbstractList<E>{
+public class SkipList<E extends Comparable<E>> extends AbstractList<E> implements AbstractSkipList<E>{
     
     protected static Random r = new Random();
 
@@ -48,6 +48,25 @@ public class SkipList<E extends Comparable<E>> extends AbstractList<E>{
             }
         };
     }
+    
+    
+     public Iterator<E> iterator1() {
+        return new Iterator<E>() {
+            SkipListEntry<E> current = head;
+
+            @Override public boolean hasNext() {
+                return current.getNextAtLevel(1) != tail;
+            }
+
+            @Override public E next() {
+                if (!hasNext()) throw new NoSuchElementException();
+                current = current.getNextAtLevel(1);
+                return current.getElem();
+            }
+        };
+    }
+    
+    
 
     @Override public int size() {
         final int[] size = {0};
@@ -108,11 +127,17 @@ public class SkipList<E extends Comparable<E>> extends AbstractList<E>{
      * we could get O(logN) by storing "window" sizes in next-pointers
      */
     @Override public E get(int index) {
-        Iterator<E> iterator = iterator();
-        while (index-- > 0) iterator.next();
-        return iterator.next();
+        if(size() > 0){
+            Iterator<E> iterator = iterator();
+            while (index-- > 0) iterator.next();
+            return iterator.next();
+        }
+        else{
+            return null;
+        }
     }
     
+    @Override
     public E getNext(int currentIndex) {
         Iterator<E> iterator = iterator();
         E el = null;
@@ -129,6 +154,31 @@ public class SkipList<E extends Comparable<E>> extends AbstractList<E>{
        }
     }
     
+    
+    
+       @Override
+      public E getNextLevel1(int currentIndex) {
+        Iterator<E> iterator = iterator1();
+        E el = null;
+        
+       while (currentIndex-- > 0){ //el = iterator.next();
+        if(iterator.hasNext()){
+             el = iterator.next();
+             return el;
+        }
+        else{
+            E first = get(0);
+            return first;
+        }
+        
+       }
+       return get((size() - 1));
+    }
+    
+    
+    
+    
+    @Override
      public E getBack(int currentIndex) {
         E el = null;
         
@@ -169,6 +219,19 @@ public class SkipList<E extends Comparable<E>> extends AbstractList<E>{
 
     @Override public boolean contains(Object o) {
         return head.contains((E) o);
+    }
+    
+    
+    @Override
+    public boolean remove(Object o){
+       if(head.removeEl((E) o))
+       {
+           
+           return true;
+       }
+       else{
+           return false;
+       }
     }
 
     private List<SkipListEntry<E>> floor(E elem) {

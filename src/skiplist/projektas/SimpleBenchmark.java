@@ -38,7 +38,7 @@ public class SimpleBenchmark {
     private final Timekeeper timekeeper;
 
     private final String[] BENCHMARK_NAMES = {"linkedListAdd", "skipListAdd", "treeSetAdd", "linkedListContains", "skipListContains", "treeSetContains"};
-    private final int[] COUNTS = {10000, 20000, 40000, 80000};
+    private final int[] COUNTS = {2000, 10000, 16000, 30000};
 
     private final Queue<String> chainsSizes = new LinkedList<>();
     

@@ -148,7 +148,7 @@ public class Gallery extends Application{
                 
                 
                 
-                
+                 
                 
             BorderPane root = new BorderPane();
             
@@ -170,6 +170,24 @@ public class Gallery extends Application{
              HBox hBox4 = new HBox();
             hBox4.getChildren().addAll(btn2);
             root.setRight(hBox4);
+            Button btn3 = new Button("2 Lygis");
+            btn3.setOnAction(new EventHandler<ActionEvent>() {
+			
+			@Override
+			public void handle(ActionEvent event) {
+                                ComparableImage nxt = imgList.getNextLevel1(curId);
+                                img.setImage(nxt.img);
+                                    curId = imgList.indexOf(nxt);
+                               
+                                 
+                                currentImgText.setText("Esamas paveiksliukas: " + nxt.imageName);
+                                imageIndexText.setText("Esamas indeksas: " + curId);
+                                validityText.setText("2 lygio elementas");
+                                validityText.setFill(Color.GREEN);
+			}
+		});
+            
+            
             
            VBox vBox1 = new VBox();
             
@@ -183,12 +201,13 @@ public class Gallery extends Application{
             
 
             vBox1.getChildren().add(validityText);
+            vBox1.getChildren().add(btn3);
 
             root.setBottom(vBox1);
             
             //root.getChildren().addAll(searchValueField, searchBtn, btn1,img, btn2, validityText);
             
-		Scene scene = new Scene(root, 550, 500);
+		Scene scene = new Scene(root, 550, 550);
                 
                 stage.setTitle("Galerija - Tomas Staškevičius IFF -8/1");
                 stage.setResizable(false);

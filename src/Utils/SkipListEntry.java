@@ -106,5 +106,24 @@ public class SkipListEntry<E extends Comparable<E>> {
     }
     
     
+    boolean removeEl(E e) {
+        return this.removeStartingAtLevel(nextPointers.size() - 1, e);
+    }
+
+    private boolean removeStartingAtLevel(int i, E e) {
+        for (; i >= 0; i--) {
+            SkipListEntry<E> nextNode = nextPointers.get(i);
+            if (nextNode.getElem() != null) {
+                if (nextNode.getElem().compareTo(e) == 0) {
+                    nextPointers.remove(i);
+                    return nextNode.removeStartingAtLevel(i, e);
+                } else if (nextNode.getElem().compareTo(e) < 0) {
+                    return nextNode.removeStartingAtLevel(i, e);
+                } /* else if next is greater than 0, continue iterating */
+            } /* else if next is tail, continue iterating */
+        }
+        return false;
+    }
+    
    
 }
